@@ -3,3 +3,6 @@ dist/
 *.tsbuildinfo
 receive_portfolio_assets.py
 .DS_Store
+
+# Private sandbox-only forensic evidence and recovery materials
+forensics/
