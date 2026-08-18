@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.tsbuildinfo
+receive_portfolio_assets.py
+.DS_Store
