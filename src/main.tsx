@@ -7,6 +7,7 @@ type Capability = {
   title: string
   description: string
   tags: string[]
+  caseId: string
 }
 
 type EvidenceFrame = {
@@ -44,24 +45,28 @@ const capabilities: Capability[] = [
     title: 'Data platforms',
     description: 'Designing dependable source-to-report flows with traceable transformations, data quality checks, and documentation that supports the people operating them.',
     tags: ['Azure Data Factory', 'Python', 'SQL', 'Data quality'],
+    caseId: 'data-platform',
   },
   {
     number: '02',
     title: 'Decision systems',
     description: 'Turning operational data into dashboards, semantic models, KPIs, and concise reporting that makes the next action obvious.',
     tags: ['Power BI', 'DAX', 'Excel', 'Business reporting'],
+    caseId: 'operational-intelligence',
   },
   {
     number: '03',
     title: 'Workflow automation',
     description: 'Reducing manual process load with API integrations, automated data pulls, human-in-the-loop validation, and repeatable operating procedures.',
     tags: ['APIs', 'Power Automate', 'Google APIs', 'PowerShell'],
+    caseId: 'ai-workflow-automation',
   },
   {
     number: '04',
     title: 'Applied AI',
     description: 'Building practical agent workflows with memory, evaluation, logging, and tool connections to structured data and APIs.',
     tags: ['Gemini', 'ADK', 'MCP', 'Function calling'],
+    caseId: 'ai-workflow-automation',
   },
 ]
 
@@ -346,7 +351,7 @@ function App() {
         <p className="shell work__note">Open any case study to follow the process and review selected execution evidence. Published artifacts exclude credentials, client-sensitive data, and operationally sensitive information.</p>
       </section>
 
-      <section className="capabilities shell" id="capabilities"><div className="capabilities__heading"><p className="section-kicker">Capabilities</p><h2>From a specific operational question to a system a team can use.</h2></div><div className="capability-list">{capabilities.map((capability) => <article className="capability" key={capability.number}><span className="capability__number">{capability.number}</span><div><h3>{capability.title}</h3><p>{capability.description}</p></div><div className="capability__tags">{capability.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></article>)}</div></section>
+      <section className="capabilities shell" id="capabilities"><div className="capabilities__heading"><p className="section-kicker">Capabilities</p><h2>From a specific operational question to a system a team can use.</h2></div><div className="capability-list">{capabilities.map((capability) => <article className="capability" key={capability.number}><span className="capability__number">{capability.number}</span><div><h3>{capability.title}</h3><p>{capability.description}</p></div><div className="capability__tags">{capability.tags.map((tag) => <span key={tag}>{tag}</span>)}<button className="capability__case-action" onClick={() => openProject(capability.caseId)} aria-label={`View the related case study for ${capability.title}`}>View related case <ArrowUpRight /></button></div></article>)}</div></section>
 
       <Contact />
       <Footer />
