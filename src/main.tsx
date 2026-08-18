@@ -348,8 +348,6 @@ function App() {
 
       <section className="capabilities shell" id="capabilities"><div className="capabilities__heading"><p className="section-kicker">Capabilities</p><h2>From a specific operational question to a system a team can use.</h2></div><div className="capability-list">{capabilities.map((capability) => <article className="capability" key={capability.number}><span className="capability__number">{capability.number}</span><div><h3>{capability.title}</h3><p>{capability.description}</p></div><div className="capability__tags">{capability.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></article>)}</div></section>
 
-      <section className="proof"><div className="shell proof__grid"><div className="proof__lead"><p className="section-kicker">Built on practical range</p><h2>Cloud data engineering.<br />Operational analytics.<br /><em>Automated workflows.</em></h2></div><div className="proof__facts"><div><strong>Azure</strong><span>Data Factory · Medallion architecture · reliability checks</span></div><div><strong>BI</strong><span>Power BI · semantic modeling · KPI reporting</span></div><div><strong>Code</strong><span>Python · SQL · REST APIs · PowerShell · Git</span></div><div><strong>Method</strong><span>Data quality · root-cause analysis · documentation</span></div></div></div></section>
-
       <Contact />
       <Footer />
     </main>
