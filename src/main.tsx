@@ -230,7 +230,7 @@ function Artifact({ className }: { className: string }) {
 
 function Contact() {
   return (
-    <section className="contact">
+    <section className="contact" id="contact" tabIndex={-1}>
       <div className="shell contact__inner">
         <p className="section-kicker">Let’s make the work more legible</p>
         <h2>Have an operational problem worth <em>untangling?</em></h2>
@@ -248,14 +248,14 @@ function Footer() {
   return <footer className="footer shell"><a href="#top"><Mark /></a><span>© {new Date().getFullYear()} David O.</span><span>Data systems & automation</span></footer>
 }
 
-function CaseStudy({ project, onBack, onNext }: { project: Project; onBack: () => void; onNext: () => void }) {
+function CaseStudy({ project, onBack, onNext, onNavigate }: { project: Project; onBack: () => void; onNext: () => void; onNavigate: (sectionId: string) => void }) {
   return (
     <main className="case-study" id="top">
       <section className="case-study__hero">
         <nav className="nav shell" aria-label="Case-study navigation">
           <button className="nav__brand nav__brand--button" onClick={onBack} aria-label="Return to the portfolio home page"><Mark /><span>David O.</span></button>
-          <div className="nav__links"><button onClick={onBack}>Selected work</button><button onClick={onBack}>Capabilities</button><button onClick={onBack}>About</button></div>
-          <a className="nav__contact" href="mailto:davidolending@gmail.com">Start a conversation <ArrowUpRight /></a>
+          <div className="nav__links"><button onClick={() => onNavigate('work')}>Selected work</button><button onClick={() => onNavigate('capabilities')}>Capabilities</button><button onClick={() => onNavigate('about')}>About</button></div>
+          <button className="nav__contact nav__contact--button" onClick={() => onNavigate('contact')}>Start a conversation <ArrowUpRight /></button>
         </nav>
         <div className="shell case-study__intro">
           <button className="back-link" onClick={onBack}><ArrowLeft /> Back to Work Gallery</button>
@@ -302,32 +302,45 @@ function CaseStudy({ project, onBack, onNext }: { project: Project; onBack: () =
 
 function App() {
   const projectById = useMemo(() => new Map(projects.map((project) => [project.id, project])), [])
-  const readHash = () => window.location.hash.replace('#case/', '')
-  const [activeProjectId, setActiveProjectId] = useState(() => projectById.has(readHash()) ? readHash() : '')
+  const readCaseHash = () => window.location.hash.startsWith('#case/') ? window.location.hash.replace('#case/', '') : ''
+  const [activeProjectId, setActiveProjectId] = useState(() => projectById.has(readCaseHash()) ? readCaseHash() : '')
   const activeProject = activeProjectId ? projectById.get(activeProjectId) : undefined
 
   useEffect(() => {
     const onHashChange = () => {
-      const nextId = readHash()
-      setActiveProjectId(projectById.has(nextId) ? nextId : '')
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      const nextId = readCaseHash()
+      if (projectById.has(nextId)) {
+        setActiveProjectId(nextId)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
     }
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [projectById])
 
-  const openProject = (id: string) => { window.location.hash = `case/${id}` }
-  const returnToGallery = () => {
-    history.pushState('', document.title, window.location.pathname + window.location.search)
-    setActiveProjectId('')
-    window.setTimeout(() => document.getElementById('work')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0)
+  const navigateToSection = (sectionId: string) => {
+    const scroll = () => {
+      const target = document.getElementById(sectionId)
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      target?.focus({ preventScroll: true })
+    }
+    history.pushState('', document.title, `${window.location.pathname}${window.location.search}#${sectionId}`)
+    if (activeProjectId) {
+      setActiveProjectId('')
+      window.setTimeout(scroll, 0)
+    } else {
+      scroll()
+    }
   }
+
+  const openProject = (id: string) => { window.location.hash = `case/${id}` }
+  const returnToGallery = () => navigateToSection('work')
   const openNext = () => {
     const currentIndex = projects.findIndex((project) => project.id === activeProjectId)
     openProject(projects[(currentIndex + 1) % projects.length].id)
   }
 
-  if (activeProject) return <CaseStudy project={activeProject} onBack={returnToGallery} onNext={openNext} />
+  if (activeProject) return <CaseStudy project={activeProject} onBack={returnToGallery} onNext={openNext} onNavigate={navigateToSection} />
 
   return (
     <main>
@@ -335,23 +348,23 @@ function App() {
         <div className="hero__noise" />
         <nav className="nav shell" aria-label="Primary navigation">
           <a className="nav__brand" href="#top"><Mark /><span>David O.</span></a>
-          <div className="nav__links"><a href="#work">Selected work</a><a href="#capabilities">Capabilities</a><a href="#about">About</a></div>
-          <a className="nav__contact" href="mailto:davidolending@gmail.com">Start a conversation <ArrowUpRight /></a>
+          <div className="nav__links"><button onClick={() => navigateToSection('work')}>Selected work</button><button onClick={() => navigateToSection('capabilities')}>Capabilities</button><button onClick={() => navigateToSection('about')}>About</button></div>
+          <button className="nav__contact nav__contact--button" onClick={() => navigateToSection('contact')}>Start a conversation <ArrowUpRight /></button>
         </nav>
-        <div className="hero__inner shell"><div className="eyebrow"><span className="status-dot" /> Available for data, automation & analytics projects</div><h1>Build the <em>system</em><br />behind better decisions.</h1><div className="hero__bottom"><p className="hero__intro">I create data systems that make complex operations more visible, more reliable, and easier to act on—across cloud pipelines, reporting, automation, and applied AI.</p><a className="circle-link" href="#work" aria-label="Explore selected work"><ArrowUpRight /></a></div></div>
+        <div className="hero__inner shell"><div className="eyebrow"><span className="status-dot" /> Available for data, automation & analytics projects</div><h1>Build the <em>system</em><br />behind better decisions.</h1><div className="hero__bottom"><p className="hero__intro">I create data systems that make complex operations more visible, more reliable, and easier to act on—across cloud pipelines, reporting, automation, and applied AI.</p><button className="circle-link" onClick={() => navigateToSection('work')} aria-label="Explore selected work"><ArrowUpRight /></button></div></div>
         <div className="hero__meter shell" aria-hidden="true"><span>DATA / SYSTEMS / AUTOMATION</span><span>01—04</span></div>
       </section>
 
-      <section className="statement shell" id="about"><p className="section-kicker">A systems-first practice</p><div className="statement__body"><h2>Good analysis is not a final slide. It is a <em>repeatable operating capability.</em></h2><p>My work connects the layers between raw inputs and confident action: ingestion, transformation, validation, reporting, automation, and the documentation that lets a team trust what comes next.</p></div></section>
+      <section className="statement shell" id="about" tabIndex={-1}><p className="section-kicker">A systems-first practice</p><div className="statement__body"><h2>Good analysis is not a final slide. It is a <em>repeatable operating capability.</em></h2><p>My work connects the layers between raw inputs and confident action: ingestion, transformation, validation, reporting, automation, and the documentation that lets a team trust what comes next.</p></div></section>
 
-      <section className="work" id="work">
+      <section className="work" id="work" tabIndex={-1}>
         <div className="shell work__heading"><p className="section-kicker">Selected work</p><p>Four ways I turn operational complexity into clear, accountable systems.</p></div>
         <div className="shell work__grid">{projects.map((project, index) => <article className={project.className} key={project.title}><div className="project-card__art"><Artifact className={`artifact--${index + 1}`} /></div><div className="project-card__content"><div className="project-card__top"><span>{project.label}</span><span>0{index + 1}</span></div><h3>{project.title}</h3><p>{project.description}</p><p className="project-card__outcome">{project.outcome}</p><div className="tag-row">{project.tags.map((tag) => <span key={tag}>{tag}</span>)}</div><button className="project-card__link" onClick={() => openProject(project.id)}>Drill into case study <ArrowUpRight /></button></div></article>)}</div>
         <div className="shell evidence-strip" aria-label="Selected portfolio evidence"><figure><img src="/assets/portfolio/automation-flow-run.png" alt="A successful Power Apps flow-run confirmation beside a multi-step automation workflow" /><figcaption><span>Automation proof</span>Completed multi-step workflow run</figcaption></figure><figure><img src="/assets/portfolio/automation-execution-audit.png" alt="A 28-day workflow execution history with successful, cancelled, and successful test runs" /><figcaption><span>Operational proof</span>Execution history for a monitored flow</figcaption></figure><figure><img src="/assets/portfolio/gis-false-color.png" alt="Side-by-side false-color and reference imagery used for geospatial interpretation" /><figcaption><span>Spatial analysis</span>False-color imagery compared with reference imagery</figcaption></figure><figure><img src="/assets/portfolio/gis-elevation-trend.png" alt="Elevation measurements displayed over time for multiple monitored stations" /><figcaption><span>Monitoring</span>Time-series elevation review across stations</figcaption></figure></div>
         <p className="shell work__note">Open any case study to follow the process and review selected execution evidence. Published artifacts exclude credentials, client-sensitive data, and operationally sensitive information.</p>
       </section>
 
-      <section className="capabilities shell" id="capabilities"><div className="capabilities__heading"><p className="section-kicker">Capabilities</p><h2>From a specific operational question to a system a team can use.</h2></div><div className="capability-list">{capabilities.map((capability) => <article className="capability" key={capability.number}><span className="capability__number">{capability.number}</span><div><h3>{capability.title}</h3><p>{capability.description}</p></div><div className="capability__tags">{capability.tags.map((tag) => <span key={tag}>{tag}</span>)}<button className="capability__case-action" onClick={() => openProject(capability.caseId)} aria-label={`View the related case study for ${capability.title}`}>View related case <ArrowUpRight /></button></div></article>)}</div></section>
+      <section className="capabilities shell" id="capabilities" tabIndex={-1}><div className="capabilities__heading"><p className="section-kicker">Capabilities</p><h2>From a specific operational question to a system a team can use.</h2></div><div className="capability-list">{capabilities.map((capability) => <article className="capability" key={capability.number}><span className="capability__number">{capability.number}</span><div><h3>{capability.title}</h3><p>{capability.description}</p></div><div className="capability__tags">{capability.tags.map((tag) => <span key={tag}>{tag}</span>)}<button className="capability__case-action" onClick={() => openProject(capability.caseId)} aria-label={`View the related case study for ${capability.title}`}>View related case <ArrowUpRight /></button></div></article>)}</div></section>
 
       <Contact />
       <Footer />
