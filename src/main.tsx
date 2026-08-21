@@ -248,13 +248,13 @@ function Footer() {
   return <footer className="footer shell"><a href="#top"><Mark /></a><span>© {new Date().getFullYear()} David O.</span><span>Data systems & automation</span></footer>
 }
 
-function CaseStudy({ project, onBack, onNext, onNavigate }: { project: Project; onBack: () => void; onNext: () => void; onNavigate: (sectionId: string) => void }) {
+function CaseStudy({ project, onBack, onNext, onNavigate, onOpenProfile }: { project: Project; onBack: () => void; onNext: () => void; onNavigate: (sectionId: string) => void; onOpenProfile: () => void }) {
   return (
     <main className="case-study" id="top">
       <section className="case-study__hero">
         <nav className="nav shell" aria-label="Case-study navigation">
           <button className="nav__brand nav__brand--button" onClick={onBack} aria-label="Return to the portfolio home page"><Mark /><span>David O.</span></button>
-          <div className="nav__links"><button onClick={() => onNavigate('work')}>Selected work</button><button onClick={() => onNavigate('capabilities')}>Capabilities</button><button onClick={() => onNavigate('about')}>About</button></div>
+          <div className="nav__links"><button onClick={() => onNavigate('work')}>Selected work</button><button onClick={() => onNavigate('capabilities')}>Capabilities</button><button onClick={onOpenProfile}>About</button></div>
           <button className="nav__contact nav__contact--button" onClick={() => onNavigate('contact')}>Start a conversation <ArrowUpRight /></button>
         </nav>
         <div className="shell case-study__intro">
@@ -300,17 +300,63 @@ function CaseStudy({ project, onBack, onNext, onNavigate }: { project: Project; 
   )
 }
 
+function AboutProfile({ onBack, onNavigate, onOpenProject }: { onBack: () => void; onNavigate: (sectionId: string) => void; onOpenProject: (id: string) => void }) {
+  const path = [
+    { period: '2019–2020', title: 'Data operations & quality', copy: 'Built a foundation in data validation, tracking, and audit-ready records that support reliable downstream reporting.' },
+    { period: '2021–2025', title: 'Credit risk & decision support', copy: 'Applied reporting, analytical models, data operations, and location-aware analysis to decision-support workflows.' },
+    { period: '2025–present', title: 'Data systems & automation', copy: 'Building cloud pipelines, data quality controls, automation, reporting, and applied AI workflows.' },
+  ]
+  const credentials = [
+    { label: 'B.S. Data Science', detail: 'Arizona State University' },
+    { label: 'Azure Data Fundamentals', detail: 'DP-900' },
+    { label: 'Power BI Data Analyst', detail: 'PL-300' },
+    { label: 'Thunderbird', detail: 'Data Analytics & Digital Transformation' },
+  ]
+
+  return (
+    <main className="profile-page" id="top">
+      <section className="profile-focus">
+        <nav className="nav shell" aria-label="Profile navigation">
+          <button className="nav__brand nav__brand--button" onClick={onBack} aria-label="Return to the portfolio overview"><Mark /><span>David O.</span></button>
+          <div className="nav__links"><button onClick={() => onNavigate('work')}>Selected work</button><button onClick={() => onNavigate('capabilities')}>Capabilities</button><button className="profile-nav__active" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-current="page">About</button></div>
+          <button className="nav__contact nav__contact--button" onClick={() => onNavigate('contact')}>Start a conversation <ArrowUpRight /></button>
+        </nav>
+        <div className="shell profile__focus-layout">
+          <aside className="profile__identity">
+            <img className="profile__portrait" src="/assets/portfolio/david-ortiz-profile.jpg" alt="Portrait of David Ortiz" />
+            <p className="section-kicker">Data systems & automation</p>
+            <h1>David Ortiz</h1>
+          </aside>
+          <div className="profile__focus-summary"><p className="section-kicker">About</p><h2>I build dependable data systems that improve how teams <em>operate and decide.</em></h2><p>My focus is data quality, reporting, automation, and applied AI—connecting the working layers between raw inputs and a reliable next step.</p><div className="profile__links" aria-label="Professional profile links"><span>Los Angeles, CA</span><a href="https://www.linkedin.com/in/davido-lending" target="_blank" rel="noreferrer">LinkedIn <ArrowUpRight /></a><a href="https://github.com/David-data-automations" target="_blank" rel="noreferrer">GitHub <ArrowUpRight /></a><button onClick={() => onNavigate('contact')}>Start a conversation <ArrowUpRight /></button></div></div>
+        </div>
+      </section>
+      <section className="profile-path"><div className="shell"><div className="profile-section-heading"><p className="section-kicker">Professional path</p><h2>Practical systems work built around <em>clarity and follow-through.</em></h2></div><div className="profile__timeline" aria-label="Professional path">{path.map((stage) => <article key={stage.period}><span className="profile__node" aria-hidden="true" /><p className="profile__period">{stage.period}</p><div><h3>{stage.title}</h3><p>{stage.copy}</p></div></article>)}</div></div></section>
+      <section className="profile-credentials"><div className="shell"><div className="profile-section-heading"><p className="section-kicker">Education & credentials</p><h2>Formal foundations, applied <em>with care.</em></h2></div><div className="profile__credential-grid">{credentials.map((credential, index) => <article key={credential.label}><span>0{index + 1}</span><h3>{credential.label}</h3><p>{credential.detail}</p></article>)}</div></div></section>
+      <section className="profile-capabilities shell"><div className="profile-section-heading"><p className="section-kicker">Working capabilities</p><h2>How I turn operational questions into <em>systems teams can use.</em></h2></div><div className="profile__capability-grid">{capabilities.map((capability) => <button key={capability.number} onClick={() => onOpenProject(capability.caseId)}><span>{capability.number}</span><strong>{capability.title}</strong><ArrowUpRight /></button>)}</div><button className="profile__explore" onClick={() => onNavigate('work')}>Explore selected work <ArrowUpRight /></button></section>
+      <Contact />
+      <Footer />
+    </main>
+  )
+}
+
 function App() {
   const projectById = useMemo(() => new Map(projects.map((project) => [project.id, project])), [])
   const readCaseHash = () => window.location.hash.startsWith('#case/') ? window.location.hash.replace('#case/', '') : ''
+  const readProfileHash = () => window.location.hash === '#profile/david-ortiz'
   const [activeProjectId, setActiveProjectId] = useState(() => projectById.has(readCaseHash()) ? readCaseHash() : '')
+  const [activeProfile, setActiveProfile] = useState(() => readProfileHash())
   const activeProject = activeProjectId ? projectById.get(activeProjectId) : undefined
 
   useEffect(() => {
     const onHashChange = () => {
       const nextId = readCaseHash()
       if (projectById.has(nextId)) {
+        setActiveProfile(false)
         setActiveProjectId(nextId)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } else if (readProfileHash()) {
+        setActiveProjectId('')
+        setActiveProfile(true)
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
     }
@@ -325,8 +371,9 @@ function App() {
       target?.focus({ preventScroll: true })
     }
     history.pushState('', document.title, `${window.location.pathname}${window.location.search}#${sectionId}`)
-    if (activeProjectId) {
+    if (activeProjectId || activeProfile) {
       setActiveProjectId('')
+      setActiveProfile(false)
       window.setTimeout(scroll, 0)
     } else {
       scroll()
@@ -334,13 +381,16 @@ function App() {
   }
 
   const openProject = (id: string) => { window.location.hash = `case/${id}` }
+  const openProfile = () => { window.location.hash = 'profile/david-ortiz' }
   const returnToGallery = () => navigateToSection('work')
+  const returnToAbout = () => navigateToSection('about')
   const openNext = () => {
     const currentIndex = projects.findIndex((project) => project.id === activeProjectId)
     openProject(projects[(currentIndex + 1) % projects.length].id)
   }
 
-  if (activeProject) return <CaseStudy project={activeProject} onBack={returnToGallery} onNext={openNext} onNavigate={navigateToSection} />
+  if (activeProject) return <CaseStudy project={activeProject} onBack={returnToGallery} onNext={openNext} onNavigate={navigateToSection} onOpenProfile={openProfile} />
+  if (activeProfile) return <AboutProfile onBack={returnToAbout} onNavigate={navigateToSection} onOpenProject={openProject} />
 
   return (
     <main>
@@ -348,7 +398,7 @@ function App() {
         <div className="hero__noise" />
         <nav className="nav shell" aria-label="Primary navigation">
           <a className="nav__brand" href="#top"><Mark /><span>David O.</span></a>
-          <div className="nav__links"><button onClick={() => navigateToSection('work')}>Selected work</button><button onClick={() => navigateToSection('capabilities')}>Capabilities</button><button onClick={() => navigateToSection('about')}>About</button></div>
+          <div className="nav__links"><button onClick={() => navigateToSection('work')}>Selected work</button><button onClick={() => navigateToSection('capabilities')}>Capabilities</button><button onClick={openProfile}>About</button></div>
           <button className="nav__contact nav__contact--button" onClick={() => navigateToSection('contact')}>Start a conversation <ArrowUpRight /></button>
         </nav>
         <div className="hero__inner shell"><div className="eyebrow"><span className="status-dot" /> Available for data, automation & analytics projects</div><h1>Build the <em>system</em><br />behind better decisions.</h1><div className="hero__bottom"><p className="hero__intro">I create data systems that make complex operations more visible, more reliable, and easier to act on—across cloud pipelines, reporting, automation, and applied AI.</p><button className="circle-link" onClick={() => navigateToSection('work')} aria-label="Explore selected work"><ArrowUpRight /></button></div></div>
